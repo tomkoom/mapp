@@ -1,5 +1,6 @@
+type User = record { id : text };
 service : () -> {
-  add : (nat) -> (nat);
-  get : () -> (nat) query;
-  inc : () -> (nat);
+  addUser : (text) -> (opt User);
+  getUserById : (text) -> (opt User) query;
+  getUsers : () -> (vec User) query;
 }
