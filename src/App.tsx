@@ -8,9 +8,13 @@ import { backend } from "./declarations/backend";
 import { useAuth } from "./context/Auth";
 
 function App() {
-  const { userId, login, logout } = useAuth();
+  const { isAuthenticated, login, logout } = useAuth();
   const [count, setCount] = useState<number | undefined>();
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    console.log(isAuthenticated);
+  }, [isAuthenticated]);
 
   // Get the current counter value
   const fetchCount = async () => {
@@ -44,10 +48,10 @@ function App() {
   return (
     <div className="App">
       <div>
-        {!userId ? (
-          <button onClick={login}>login</button>
+        {isAuthenticated ? (
+          <button onClick={logout}>logout</button>
         ) : (
-          <button onClick={logout}>{userId.substring(0, 5)}</button>
+          <button onClick={login}>login</button>
         )}
 
         <a href="https://vitejs.dev" target="_blank">

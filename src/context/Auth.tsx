@@ -1,63 +1,80 @@
 import { useContext, createContext, useState, useEffect } from "react";
 import { AuthClient } from "@dfinity/auth-client";
-import { Actor, HttpAgent } from "@dfinity/agent";
+import { Actor, HttpAgent, Identity, Agent } from "@dfinity/agent";
 import { idlFactory } from "../declarations/backend";
 import { _SERVICE } from "../declarations/backend/backend.did";
 
 export const AuthContext = createContext(null);
-const useAuth = () => {
+export const useAuth = () => {
   return useContext(AuthContext);
 };
-export { useAuth };
 
 export const AuthProvider = ({ children }) => {
   const [authClient, setAuthClient] = useState<AuthClient | null>(null);
-  const [userId, setUserId] = useState<string>("");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [identity, setIdentity] = useState<Identity | null>(null);
+  const [agent, setAgent] = useState<Agent | null>(null);
   const [actor, setActor] = useState<Actor | null>(null);
 
-  const init = async () => {
-    const authClient = await AuthClient.create();
-    const isAuth = await authClient.isAuthenticated();
-    setAuthClient(authClient);
-
-    if (isAuth) {
-      handleAuth(authClient);
-    }
+  const init = () => {
+    reset();
   };
 
   useEffect(() => {
     init();
   }, []);
 
-  const handleAuth = (authClient: AuthClient) => {
-    const identity = authClient.getIdentity();
-    const userId = identity.getPrincipal().toString();
-    const agent = new HttpAgent({ identity });
-    const canisterId = process.env.CANISTER_ID_BACKEND;
+  const reset = async () => {
+    let authClient: AuthClient = null;
+    let isAuthenticated = false;
+    let identity: Identity = null;
+    let agent: HttpAgent = null;
+    let actor: Actor = null;
 
-    const actor = Actor.createActor<_SERVICE>(idlFactory, {
-      agent,
-      canisterId,
+    authClient = await AuthClient.create();
+    isAuthenticated = await authClient.isAuthenticated();
+    identity = authClient.getIdentity();
+    agent = new HttpAgent({
+      identity: identity,
     });
-    setUserId(userId);
+    actor = Actor.createActor(idlFactory, {
+      agent: agent,
+      canisterId: process.env.CANISTER_ID_BACKEND,
+    });
+
+    setAuthClient(authClient);
+    setIsAuthenticated(isAuthenticated);
+    setIdentity(identity);
+    setAgent(agent);
     setActor(actor);
   };
 
   const login = async () => {
+    if (isAuthenticated) throw new Error("already logged in");
     await authClient.login({
       onSuccess: async () => {
-        handleAuth(authClient);
+        reset();
       },
     });
   };
 
   const logout = async () => {
+    if (!isAuthenticated) throw new Error("not logged in");
     await authClient.logout();
-    setUserId("");
-    setActor(null);
+    return reset();
   };
 
-  const value = { userId, actor, login, logout };
+  const value = {
+    authClient,
+    isAuthenticated,
+    identity,
+    agent,
+    actor,
+
+    // ...
+    login,
+    logout,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
