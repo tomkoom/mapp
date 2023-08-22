@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
-import './App.css';
-import azleLogo from './assets/azle_logo.svg';
-import azleShadow from './assets/azle_shadow.png';
-import reactLogo from './assets/react.svg';
-import viteLogo from './assets/vite.svg';
-import { backend } from './declarations/backend';
+import { useEffect, useState } from "react";
+import "./App.css";
+import azleLogo from "./assets/azle_logo.svg";
+import azleShadow from "./assets/azle_shadow.png";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "./assets/vite.svg";
+import { backend } from "./declarations/backend";
+import { useAuth } from "./context/Auth";
 
 function App() {
+  const { userId, login, logout } = useAuth();
   const [count, setCount] = useState<number | undefined>();
   const [loading, setLoading] = useState(false);
 
@@ -42,16 +44,19 @@ function App() {
   return (
     <div className="App">
       <div>
+        {!userId ? (
+          <button onClick={login}>login</button>
+        ) : (
+          <button onClick={logout}>{userId.substring(0, 5)}</button>
+        )}
+
         <a href="https://vitejs.dev" target="_blank">
           <img src={viteLogo} className="logo vite" alt="Vite logo" />
         </a>
         <a href="https://reactjs.org" target="_blank">
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
-        <a
-          href="https://github.com/demergent-labs/azle"
-          target="_blank"
-        >
+        <a href="https://github.com/demergent-labs/azle" target="_blank">
           <span className="logo-stack">
             <img
               src={azleShadow}
