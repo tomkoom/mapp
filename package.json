@@ -6,7 +6,7 @@
     "setup": "npm i && dfx canister create backend && dfx generate backend && dfx deploy",
     "start": "run-p frontend backend",
     "frontend": "vite --port 3000",
-    "backend": "dfx deploy backend && backend_types",
+    "backend": "dfx deploy backend && npm run backend_types",
     "backend_types": "dfx generate backend",
     "build": "tsc && vite build",
     "test": "run-s  test:frontend",

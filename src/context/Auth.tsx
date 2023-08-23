@@ -9,6 +9,11 @@ export const useAuth = () => {
   return useContext(AuthContext);
 };
 
+// constants
+// .env variables change after deploy
+const IS_LOCAL_NETWORK = process.env.DFX_NETWORK == "local";
+const HOST = IS_LOCAL_NETWORK ? `http://localhost:3000/` : "https://icp0.io/";
+
 export const AuthProvider = ({ children }) => {
   const [authClient, setAuthClient] = useState<AuthClient | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -35,10 +40,11 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated = await authClient.isAuthenticated();
     identity = authClient.getIdentity();
     agent = new HttpAgent({
-      identity: identity,
+      host: HOST,
+      identity,
     });
     actor = Actor.createActor(idlFactory, {
-      agent: agent,
+      agent,
       canisterId: process.env.CANISTER_ID_BACKEND,
     });
 
