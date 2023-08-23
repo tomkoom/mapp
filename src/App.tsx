@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import "./App.css";
 import { backend } from "./declarations/backend";
 import type { ICRC1Value } from "./declarations/backend/backend.did";
 
@@ -55,10 +54,10 @@ function App() {
   }, []);
 
   return (
-    <div className="app">
+    <div>
       <Nav />
 
-      <div className="main">
+      <Main>
         {tokenMeta && (
           <div>
             <h3>token</h3>
@@ -67,20 +66,24 @@ function App() {
         )}
 
         <div>
-          <h3>users</h3>
-          <Users>
+          <h3 className="sectionTitle">registered users</h3>
+          <ul>
             {users.map((user) => (
               <li key={user.id}>
                 <code>{user.id}</code>
               </li>
             ))}
-          </Users>
+          </ul>
         </div>
-      </div>
+      </Main>
     </div>
   );
 }
 
-const Users = styled.ul``;
+const Main = styled.div`
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+`;
 
 export default App;

@@ -11,7 +11,7 @@ export const useAuth = () => {
 
 // constants
 // .env variables change after deploy
-const IS_LOCAL_NETWORK = process.env.DFX_NETWORK == "local";
+const IS_LOCAL_NETWORK = process.env.DFX_NETWORK === "local";
 const HOST = IS_LOCAL_NETWORK ? `http://localhost:3000/` : "https://icp0.io/";
 
 export const AuthProvider = ({ children }) => {

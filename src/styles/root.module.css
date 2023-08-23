@@ -1,0 +1,59 @@
+/* root styles */
+
+:root {
+  /* colors */
+
+  /* Cool Gray IBM https://www.ibm.com/design/language/color/ */
+
+  --gray100: #121619;
+  --gray90: #21272a;
+  --gray80: #343a3f;
+  --gray70: #4d5358;
+  --gray60: #697077;
+  --gray50: #878d96;
+  --gray40: #a2a9b0;
+  --gray30: #c1c7cd;
+  --gray20: #dde1e6;
+  --gray10: #f2f4f8;
+
+  --primaryColor: var(--gray100);
+  --primaryColorRgb: 18, 22, 25;
+  --secondaryColor: var(--gray80);
+  --tertiaryColor: var(--gray60);
+
+  --background: #fff;
+
+  --underlay4: var(--gray40);
+  --underlay3: var(--gray30);
+  --underlay2: var(--gray20);
+  --underlay1: var(--gray10);
+
+  /* system colors */
+
+  /* https://www.materialpalette.com/colors */
+  --colorOk: #4caf50; /* 500 */
+  --colorErr: #f44336; /* 500 */
+  --colorErrUnderlay: #ffebee; /* 50 */
+
+  /* font-size */
+
+  --fs1: 3.052rem;
+  --fs2: 2.441rem;
+  --fs3: 1.953rem;
+  --fs4: 1.563rem;
+  --fs5: 1.25rem;
+  --fs6: 1rem;
+  --fsText: 0.9rem;
+  --fs7: 0.8rem;
+
+  /* font-weight */
+
+  --fwSemiBold: 600;
+  --fwMedium: 500;
+  --fwRegular: 400;
+
+  /* font-family */
+
+  --fontFamily: "Inconsolata", monospace;
+  --monospace: "Inconsolata", monospace;
+}

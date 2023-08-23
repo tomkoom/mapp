@@ -4,6 +4,9 @@ import styled from "styled-components";
 // utils
 import { formatId } from "../../utils/formatId";
 
+// components
+import { Btn } from "../ui/_index";
+
 // auth
 import { useAuth } from "../../context/Auth";
 
@@ -17,10 +20,10 @@ const Nav: FC = (): JSX.Element => {
       {isAuthenticated ? (
         <LoggedIn>
           <span>{formatId(id)}</span>
-          <button onClick={logout}>logout</button>
+          <Btn btnType="secondary" text="logout" onClick={logout} />
         </LoggedIn>
       ) : (
-        <button onClick={login}>login</button>
+        <Btn btnType="primary" text="login" onClick={login} />
       )}
     </NavStyled>
   );
