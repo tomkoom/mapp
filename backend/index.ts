@@ -10,7 +10,10 @@ import {
   text,
   match,
   StableBTreeMap,
+  Variant,
+  nat,
 } from "azle";
+
 import {
   ICRC1Account,
   ICRC,
@@ -55,6 +58,18 @@ export async function icrc1_metadata(): Promise<
   Vec<Tuple<[text, ICRC1Value]>>
 > {
   const result = await icrc.icrc1_metadata().call();
+
+  return match(result, {
+    Ok: (ok) => ok,
+    Err: (err) => ic.trap(err),
+  });
+}
+
+$update;
+export async function icrc1_transfer(
+  transferArgs: ICRC1TransferArgs,
+): Promise<Variant<{ Ok: nat; Err: ICRC1TransferError }>> {
+  const result = await icrc.icrc1_transfer(transferArgs).call();
 
   return match(result, {
     Ok: (ok) => ok,

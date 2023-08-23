@@ -1,6 +1,7 @@
 import { useContext, createContext, useState, useEffect } from "react";
 import { AuthClient } from "@dfinity/auth-client";
 import { Actor, HttpAgent, Identity, Agent } from "@dfinity/agent";
+import type { Principal } from "@dfinity/principal";
 import { idlFactory } from "../declarations/backend";
 import { _SERVICE } from "../declarations/backend/backend.did";
 
@@ -18,6 +19,7 @@ export const AuthProvider = ({ children }) => {
   const [authClient, setAuthClient] = useState<AuthClient | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [identity, setIdentity] = useState<Identity | null>(null);
+  const [userPrincipal, setUserPrincipal] = useState<Principal | null>(null);
   const [agent, setAgent] = useState<Agent | null>(null);
   const [actor, setActor] = useState<Actor | null>(null);
 
@@ -33,12 +35,14 @@ export const AuthProvider = ({ children }) => {
     let authClient: AuthClient = null;
     let isAuthenticated = false;
     let identity: Identity = null;
+    let userPrincipal: Principal = null;
     let agent: HttpAgent = null;
     let actor: Actor = null;
 
     authClient = await AuthClient.create();
     isAuthenticated = await authClient.isAuthenticated();
     identity = authClient.getIdentity();
+    userPrincipal = identity.getPrincipal();
     agent = new HttpAgent({
       host: HOST,
       identity,
@@ -51,6 +55,7 @@ export const AuthProvider = ({ children }) => {
     setAuthClient(authClient);
     setIsAuthenticated(isAuthenticated);
     setIdentity(identity);
+    setUserPrincipal(userPrincipal);
     setAgent(agent);
     setActor(actor);
   };
@@ -74,6 +79,7 @@ export const AuthProvider = ({ children }) => {
     authClient,
     isAuthenticated,
     identity,
+    userPrincipal,
     agent,
     actor,
 

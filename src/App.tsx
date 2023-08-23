@@ -17,10 +17,10 @@ interface User {
 const IS_LOCAL_NETWORK = process.env.DFX_NETWORK == "local";
 
 function App() {
-  const { identity } = useAuth();
+  const { identity, userPrincipal } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [tokenMeta, setTokenMeta] = useState<any>({});
-  const id = identity && identity.getPrincipal().toString();
+  const userId = userPrincipal && userPrincipal.toString();
   const token = {
     "icrc1:decimals": "8",
     "icrc1:name": "tkn",
@@ -28,16 +28,31 @@ function App() {
     "icrc1:fee": "100000",
   };
 
-  useEffect(() => {
-    const addUser = async (): Promise<void> => {
-      if (identity) {
-        const userId = identity.getPrincipal();
-        await backend.addUser(userId);
-        await refreshUsers();
-      }
+  const addUser = async (): Promise<void> => {
+    await backend.addUser(userPrincipal);
+    await refreshUsers();
+  };
+
+  const sendTokens = async (): Promise<void> => {
+    const transferArgs = {
+      to: { owner: userPrincipal, subaccount: null },
+      amount: BigInt(1000 * 10 ** 8),
+      from_subaccount: null,
+      fee: null,
+      memo: null,
+      created_at_time: null,
     };
-    addUser();
-  }, [identity]);
+    await backend
+      .icrc1_transfer(transferArgs)
+      .then(() => console.log("tokens sent"));
+  };
+
+  useEffect(() => {
+    if (userPrincipal) {
+      addUser();
+      sendTokens();
+    }
+  }, [userPrincipal]);
 
   const refreshUsers = async (): Promise<void> => {
     const users = await backend.getUsers();
@@ -90,7 +105,7 @@ function App() {
             {users.map((user) => (
               <li
                 style={
-                  id === user.id
+                  userId === user.id
                     ? { backgroundColor: "var(--underlay1)" }
                     : null
                 }

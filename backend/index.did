@@ -1,13 +1,43 @@
+type ICRC1Account = record { owner : principal; subaccount : opt vec nat8 };
+type ICRC1TransferArgs = record {
+  to : ICRC1Account;
+  fee : opt nat;
+  memo : opt vec nat8;
+  from_subaccount : opt vec nat8;
+  created_at_time : opt nat64;
+  amount : nat;
+};
+type ICRC1TransferError = variant {
+  GenericError : _InlineICRC1TransferErrorGenericError;
+  TemporarilyUnavailable;
+  BadBurn : _InlineICRC1TransferErrorBadBurn;
+  Duplicate : _InlineICRC1TransferErrorDuplicate;
+  BadFee : _InlineICRC1TransferErrorBadFee;
+  CreatedInFuture : _InlineICRC1TransferErrorCreatedInFuture;
+  TooOld;
+  InsufficientFunds : _InlineICRC1TransferErrorInsufficientFunds;
+};
 type ICRC1Value = variant {
   Int : int;
   Nat : nat;
   Blob : vec nat8;
   Text : text;
 };
+type ManualReply = variant { Ok : nat; Err : ICRC1TransferError };
 type User = record { id : text };
+type _InlineICRC1TransferErrorBadBurn = record { min_burn_amount : nat };
+type _InlineICRC1TransferErrorBadFee = record { expected_fee : nat };
+type _InlineICRC1TransferErrorCreatedInFuture = record { ledger_time : nat64 };
+type _InlineICRC1TransferErrorDuplicate = record { duplicate_of : nat };
+type _InlineICRC1TransferErrorGenericError = record {
+  message : text;
+  error_code : nat;
+};
+type _InlineICRC1TransferErrorInsufficientFunds = record { balance : nat };
 service : () -> {
   addUser : (principal) -> (opt User);
   getUserById : (principal) -> (opt User) query;
   getUsers : () -> (vec User) query;
   icrc1_metadata : () -> (vec record { text; ICRC1Value }) query;
+  icrc1_transfer : (ICRC1TransferArgs) -> (ManualReply);
 }
