@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
+import { size } from "./styles/breakpoints";
 import { backend } from "./declarations/backend";
 import type { ICRC1Value } from "./declarations/backend/backend.did";
 
@@ -18,12 +19,19 @@ const IS_LOCAL_NETWORK = process.env.DFX_NETWORK == "local";
 function App() {
   const { identity } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
-  const [tokenMeta, setTokenMeta] = useState<any>();
+  const [tokenMeta, setTokenMeta] = useState<any>({});
+  const id = identity && identity.getPrincipal().toString();
+  const token = {
+    "icrc1:decimals": "8",
+    "icrc1:name": "tkn",
+    "icrc1:symbol": "TKN",
+    "icrc1:fee": "100000",
+  };
 
   useEffect(() => {
     const addUser = async (): Promise<void> => {
       if (identity) {
-        const userId = identity.getPrincipal().toString();
+        const userId = identity.getPrincipal();
         await backend.addUser(userId);
         await refreshUsers();
       }
@@ -58,19 +66,37 @@ function App() {
       <Nav />
 
       <Main>
-        {tokenMeta && (
-          <div>
-            <h3>token</h3>
-            <pre>{JSON.stringify(tokenMeta, null, 2)}</pre>
-          </div>
-        )}
+        <div>
+          <h3 className="sectionTitle">token</h3>
+          <Token>
+            <a
+              href="https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.ic0.app/?id=6jhti-pyaaa-aaaag-abnwa-cai"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              token interface
+            </a>
+            <pre>
+              {IS_LOCAL_NETWORK
+                ? JSON.stringify(token, null, 2)
+                : JSON.stringify(tokenMeta, null, 2)}
+            </pre>
+          </Token>
+        </div>
 
         <div>
           <h3 className="sectionTitle">registered users</h3>
           <ul>
             {users.map((user) => (
-              <li key={user.id}>
-                <code>{user.id}</code>
+              <li
+                style={
+                  id === user.id
+                    ? { backgroundColor: "var(--underlay1)" }
+                    : null
+                }
+                key={user.id}
+              >
+                {user.id}
               </li>
             ))}
           </ul>
@@ -81,9 +107,25 @@ function App() {
 }
 
 const Main = styled.div`
-  max-width: 1280px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  max-width: ${size.tablet}px;
   margin: 0 auto;
   padding: 2rem;
+`;
+
+const Token = styled.div`
+  > a {
+    display: inline-block;
+    margin-bottom: 0.25rem;
+  }
+
+  > pre {
+    background-color: var(--underlay1);
+    padding: 1rem;
+  }
 `;
 
 export default App;

@@ -59,6 +59,7 @@ const GlobalStyles = createGlobalStyle`
     box-sizing: border-box;
     padding: 0;
     margin: 0;
+    font-family: var(--fontFamily);
   }
 
   html {
@@ -66,7 +67,6 @@ const GlobalStyles = createGlobalStyle`
   }
 
   body {
-    font-family: var(--fontFamily);
     color: var(--primaryColor);
   }
 
@@ -86,7 +86,7 @@ const GlobalStyles = createGlobalStyle`
 
   a {
     color: var(--primaryColor);
-    text-decoration: none;
+    text-decoration: underline;
   }
 
   p,

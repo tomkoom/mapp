@@ -6,8 +6,8 @@ type ICRC1Value = variant {
 };
 type User = record { id : text };
 service : () -> {
-  addUser : (text) -> (opt User);
-  getUserById : (text) -> (opt User) query;
+  addUser : (principal) -> (opt User);
+  getUserById : (principal) -> (opt User) query;
   getUsers : () -> (vec User) query;
   icrc1_metadata : () -> (vec record { text; ICRC1Value }) query;
 }

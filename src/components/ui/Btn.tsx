@@ -2,19 +2,19 @@ import { FC, ButtonHTMLAttributes } from "react";
 import styled from "styled-components";
 
 interface BtnProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  btnType: "primary" | "secondary";
+  $btntype: "primary" | "secondary";
   text: string;
   onClick: () => void;
 }
 
 const Btn: FC<BtnProps> = ({
-  btnType,
+  $btntype,
   text,
   onClick,
   ...props
 }): JSX.Element => {
   return (
-    <BtnStyled btnType={btnType} onClick={onClick} {...props}>
+    <BtnStyled $btntype={$btntype} onClick={onClick} {...props}>
       {text}
     </BtnStyled>
   );
@@ -35,7 +35,7 @@ const hoverBgColors = {
   secondary: "var(--underlay2)",
 };
 
-const BtnStyled = styled.button<{ btnType: "primary" | "secondary" }>`
+const BtnStyled = styled.button<{ $btntype: "primary" | "secondary" }>`
   /* common */
   height: 2.5rem;
   padding: 0 1rem;
@@ -44,11 +44,11 @@ const BtnStyled = styled.button<{ btnType: "primary" | "secondary" }>`
   transition: all 0.25s, opacity 1s;
 
   /* custom */
-  color: ${(p) => colors[p.btnType]};
-  background-color: ${(p) => bgColors[p.btnType]};
+  color: ${(p) => colors[p.$btntype]};
+  background-color: ${(p) => bgColors[p.$btntype]};
 
   &:hover {
-    background-color: ${(p) => hoverBgColors[p.btnType]};
+    background-color: ${(p) => hoverBgColors[p.$btntype]};
   }
 `;
 

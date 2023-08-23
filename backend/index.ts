@@ -9,6 +9,7 @@ import {
   Tuple,
   text,
   match,
+  StableBTreeMap,
 } from "azle";
 import {
   ICRC1Account,
@@ -18,41 +19,31 @@ import {
   ICRC1Value,
 } from "azle/canisters/icrc";
 
-type Db = {
-  users: {
-    [id: string]: User;
-  };
-};
-
 type User = Record<{
   id: string;
 }>;
 
-let db: Db = {
-  users: {},
-};
+// map
+const users = new StableBTreeMap<Principal, User>(0, 100, 1_000);
 
 $query;
-export function getUserById(id: string): Opt<User> {
-  const userOrUndefined = db.users[id];
+export function getUserById(id: Principal): Opt<User> {
+  return users.get(id);
+}
 
-  return userOrUndefined ? Opt.Some(userOrUndefined) : Opt.None;
+$update;
+export function addUser(id: Principal): Opt<User> {
+  if (id.isAnonymous()) {
+    return Opt.None;
+  }
+
+  const user = { id: id.toText() };
+  return users.insert(id, user);
 }
 
 $query;
 export function getUsers(): Vec<User> {
-  return Object.values(db.users);
-}
-
-$update;
-export function addUser(id: string): Opt<User> {
-  if (Principal.fromText(id).isAnonymous()) return Opt.None;
-
-  const user = {
-    id,
-  };
-  db.users[id] = user;
-  return Opt.Some(user);
+  return users.values();
 }
 
 // token
@@ -70,10 +61,3 @@ export async function icrc1_metadata(): Promise<
     Err: (err) => ic.trap(err),
   });
 }
-
-// const icrc = new ICRC(
-//   Principal.fromText(
-//     process.env.ICRC_PRINCIPAL ??
-//       ic.trap("process.env.ICRC_PRINCIPAL is undefined"),
-//   ),
-// );

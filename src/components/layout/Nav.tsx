@@ -20,10 +20,10 @@ const Nav: FC = (): JSX.Element => {
       {isAuthenticated ? (
         <LoggedIn>
           <span>{formatId(id)}</span>
-          <Btn btnType="secondary" text="logout" onClick={logout} />
+          <Btn $btntype="secondary" text="logout" onClick={logout} />
         </LoggedIn>
       ) : (
-        <Btn btnType="primary" text="login" onClick={login} />
+        <Btn $btntype="primary" text="login" onClick={login} />
       )}
     </NavStyled>
   );
