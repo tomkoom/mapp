@@ -25,7 +25,7 @@ const GlobalStyles = createGlobalStyle`
   h4,
   h5,
   h6 {
-    font-weight: var(--fwBold);
+    font-weight: var(--fwSemiBold);
     line-height: 100%;
   }
 
@@ -63,7 +63,7 @@ const GlobalStyles = createGlobalStyle`
   }
 
   html {
-    font-size: 18px; /* root font size */
+    font-size: 20px; /* root font size */
   }
 
   body {

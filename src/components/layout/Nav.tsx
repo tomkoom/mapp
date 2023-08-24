@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, Dispatch, SetStateAction } from "react";
 import styled from "styled-components";
 
 // utils
@@ -10,9 +10,18 @@ import { Btn } from "../ui/_index";
 // auth
 import { useAuth } from "../../context/Auth";
 
-const Nav: FC = (): JSX.Element => {
+interface NavProps {
+  setBalance: Dispatch<SetStateAction<string>>;
+}
+
+const Nav: FC<NavProps> = ({ setBalance }): JSX.Element => {
   const { isAuthenticated, identity, login, logout } = useAuth();
   const id = identity && identity.getPrincipal().toString();
+
+  const signOut = async () => {
+    setBalance("");
+    await logout();
+  };
 
   return (
     <NavStyled>
@@ -20,7 +29,7 @@ const Nav: FC = (): JSX.Element => {
       {isAuthenticated ? (
         <LoggedIn>
           <span>{formatId(id)}</span>
-          <Btn $btntype="secondary" text="logout" onClick={logout} />
+          <Btn $btntype="secondary" text="logout" onClick={signOut} />
         </LoggedIn>
       ) : (
         <Btn $btntype="primary" text="login" onClick={login} />

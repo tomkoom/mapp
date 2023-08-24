@@ -34,6 +34,12 @@ export function getUserById(id: Principal): Opt<User> {
   return users.get(id);
 }
 
+$query;
+export function userExists(id: Principal): boolean {
+  console.log(id.toString());
+  return users.containsKey(id);
+}
+
 $update;
 export function addUser(id: Principal): Opt<User> {
   if (id.isAnonymous()) {
@@ -70,6 +76,16 @@ export async function icrc1_transfer(
   transferArgs: ICRC1TransferArgs,
 ): Promise<Variant<{ Ok: nat; Err: ICRC1TransferError }>> {
   const result = await icrc.icrc1_transfer(transferArgs).call();
+
+  return match(result, {
+    Ok: (ok) => ok,
+    Err: (err) => ic.trap(err),
+  });
+}
+
+$query;
+export async function icrc1_balance_of(account: ICRC1Account): Promise<nat> {
+  const result = await icrc.icrc1_balance_of(account).call();
 
   return match(result, {
     Ok: (ok) => ok,
