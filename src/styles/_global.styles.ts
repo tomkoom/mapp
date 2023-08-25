@@ -70,9 +70,9 @@ const GlobalStyles = createGlobalStyle`
     color: var(--primaryColor);
   }
 
-  input {
+  /* input {
     all: unset;
-  }
+  } */
 
   button {
     color: inherit;
@@ -95,7 +95,7 @@ const GlobalStyles = createGlobalStyle`
   label,
   ul {
     line-height: 150%;
-    font-size: var(--fs6);
+    font-size: var(--fsText);
   }
 
   ul {

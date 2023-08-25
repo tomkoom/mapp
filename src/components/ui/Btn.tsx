@@ -37,10 +37,12 @@ const hoverBgColors = {
 
 const BtnStyled = styled.button<{ $btntype: "primary" | "secondary" }>`
   /* common */
-  height: 2.5rem;
-  padding: 0 1rem;
-  font-size: var(--fs6);
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  font-size: var(--fsText);
   font-weight: var(--fwSemiBold);
+  white-space: nowrap;
+  border-radius: 0.25rem;
   transition: all 0.25s, opacity 1s;
 
   /* custom */

@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useState, useEffect, Dispatch, SetStateAction } from "react";
 import styled from "styled-components";
 import { GoogleMap, useJsApiLoader, MarkerF } from "@react-google-maps/api";
 
@@ -7,26 +7,37 @@ import { AutocompleteInput } from "./_index";
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-const Map: FC = (): JSX.Element => {
+interface CommonProps {
+  selected: google.maps.LatLngLiteral | null;
+}
+
+interface MapProps extends CommonProps {
+  setMapIsLoaded: Dispatch<SetStateAction<boolean>>;
+}
+
+const Map: FC<MapProps> = ({ selected, setMapIsLoaded }): JSX.Element => {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: API_KEY,
     libraries: ["places"],
   });
 
+  useEffect(() => {
+    if (isLoaded) {
+      setMapIsLoaded(true);
+    }
+  }, [isLoaded]);
+
   if (!isLoaded) {
     return <div>Loading...</div>;
   }
 
-  return <GMap />;
+  return <GMap selected={selected} />;
 };
 
-const GMap: FC = (): JSX.Element => {
-  const [selected, setSelected] = useState<google.maps.LatLngLiteral | null>(
-    null,
-  );
+const GMap: FC<CommonProps> = ({ selected }): JSX.Element => {
   const containerStyle = {
     width: "100%",
-    height: "400px",
+    height: "calc(100vh - 3rem) ",
   };
 
   const center: google.maps.LatLngLiteral = {
@@ -35,12 +46,17 @@ const GMap: FC = (): JSX.Element => {
   };
 
   return (
-    <div>
-      <AutocompleteInput setSelected={setSelected} />
+    <div style={{ zIndex: "-1" }}>
+      {/* <AutocompleteInput setSelected={setSelected} /> */}
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={selected ? selected : center}
         zoom={10}
+        options={{
+          fullscreenControl: false,
+          streetViewControl: false,
+          // disableDefaultUI: true,
+        }}
       >
         {selected && (
           <MarkerF position={selected} onClick={() => console.log(selected)} />

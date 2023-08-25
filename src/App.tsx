@@ -38,6 +38,10 @@ function App() {
   const { userPrincipal } = useAuth();
   const { users, refreshUsers } = useUsers();
   const [balance, setBalance] = useState<string>("");
+  const [mapIsLoaded, setMapIsLoaded] = useState<boolean>(false);
+  const [selected, setSelected] = useState<google.maps.LatLngLiteral | null>(
+    null,
+  );
   const userId = userPrincipal && userPrincipal.toString();
 
   const userExists = async (): Promise<boolean> => {
@@ -112,13 +116,18 @@ function App() {
 
   return (
     <AppStyled>
-      <Nav balance={balance} setBalance={setBalance} />
+      <Nav
+        balance={balance}
+        setBalance={setBalance}
+        setSelected={setSelected}
+        mapIsLoaded={mapIsLoaded}
+      />
 
       <Main>
-        <Map />
+        <Map selected={selected} setMapIsLoaded={setMapIsLoaded} />
 
         {/* users */}
-        <div>
+        {/* <div>
           <h3 className="sectionTitle">registered users</h3>
           {users.length > 0 ? (
             <ul>
@@ -138,15 +147,15 @@ function App() {
           ) : (
             "..."
           )}
-        </div>
+        </div> */}
       </Main>
     </AppStyled>
   );
 }
 
 const AppStyled = styled.div`
-  padding: 0 1rem;
-  margin-bottom: 4rem;
+  /* padding: 0 1rem; */
+  /* margin-bottom: 4rem; */
 `;
 
 const Main = styled.div`
@@ -154,24 +163,6 @@ const Main = styled.div`
   flex-direction: column;
   gap: 1rem;
   margin: 0 auto;
-`;
-
-const Token = styled.div`
-  > div.balance {
-    background-color: var(--underlay1);
-    padding: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-
-  > a {
-    display: inline-block;
-    margin-bottom: 0.25rem;
-  }
-
-  > pre {
-    background-color: var(--underlay1);
-    padding: 1rem;
-  }
 `;
 
 export default App;

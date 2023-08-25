@@ -1,4 +1,4 @@
-import { FC, Dispatch, SetStateAction } from "react";
+import { FC, Dispatch, SetStateAction, useState } from "react";
 import styled from "styled-components";
 
 // utils
@@ -6,6 +6,7 @@ import { formatId } from "../../utils/formatId";
 
 // components
 import { Btn } from "../ui/_index";
+import { AutocompleteInput } from "../../panels/map/_index";
 
 // auth
 import { useAuth } from "../../context/Auth";
@@ -13,10 +14,18 @@ import { useAuth } from "../../context/Auth";
 interface NavProps {
   balance: string;
   setBalance: Dispatch<SetStateAction<string>>;
+  setSelected: Dispatch<SetStateAction<google.maps.LatLngLiteral | null>>;
+  mapIsLoaded: boolean;
 }
 
-const Nav: FC<NavProps> = ({ balance, setBalance }): JSX.Element => {
+const Nav: FC<NavProps> = ({
+  balance,
+  setBalance,
+  setSelected,
+  mapIsLoaded,
+}): JSX.Element => {
   const { isAuthenticated, identity, login, logout } = useAuth();
+
   const id = identity && identity.getPrincipal().toString();
 
   const signOut = async () => {
@@ -28,64 +37,75 @@ const Nav: FC<NavProps> = ({ balance, setBalance }): JSX.Element => {
     <NavStyled>
       <div id="title">
         <h1>mapp</h1>
-        <span>&ndash; collaborative map curation</span>
+        <span>- collaboratively curated map</span>
       </div>
 
-      <a
-        href="https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.ic0.app/?id=6jhti-pyaaa-aaaag-abnwa-cai"
-        target="_blank"
-        rel="noreferrer noopener"
-      >
-        Token interface
-      </a>
+      {mapIsLoaded && <AutocompleteInput setSelected={setSelected} />}
 
-      <div id="balance">
-        Balance: <span>{balance ? balance : "..."}</span>
-      </div>
+      <NavItems>
+        <a
+          href="https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.ic0.app/?id=6jhti-pyaaa-aaaag-abnwa-cai"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          Token interface
+        </a>
 
-      {isAuthenticated ? (
-        <LoggedIn>
-          <span>{formatId(id)}</span>
-          <Btn $btntype="secondary" text="Logout" onClick={signOut} />
-        </LoggedIn>
-      ) : (
-        <Btn $btntype="primary" text="Login" onClick={login} />
-      )}
+        <div id="balance">
+          Balance: <span>{balance ? balance : "..."}</span>
+        </div>
+
+        {isAuthenticated ? (
+          <LoggedIn>
+            <span>{formatId(id)}</span>
+            <Btn $btntype="secondary" text="Logout" onClick={signOut} />
+          </LoggedIn>
+        ) : (
+          <Btn $btntype="secondary" text="Login" onClick={login} />
+        )}
+      </NavItems>
     </NavStyled>
   );
 };
 
 const NavStyled = styled.div`
+  width: 100%;
+  height: 3rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 0;
+  padding: 0 0.5rem;
 
   > div#title {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 0.25rem;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    margin-right: 0.5rem;
+    gap: 0.125rem;
 
     > h1 {
-      font-size: var(--fs4);
+      font-size: var(--fs5);
       font-weight: var(--fwBlack);
-      padding-bottom: 0.25rem;
+      padding-bottom: 0.2rem;
     }
 
     > span {
-      padding: 0.5rem;
+      margin-left: 0.25rem;
     }
   }
+`;
 
-  > a {
-    margin-left: auto;
-    margin-right: 0.5rem;
-  }
+const NavItems = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 0.5rem;
 
+  > a,
   > div#balance {
-    padding: 0.5rem;
-    margin-right: 0.5rem;
+    font-size: var(--fsText);
+    white-space: nowrap;
   }
 `;
 

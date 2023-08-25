@@ -55,4 +55,8 @@
 
   --fontFamily: "Inter", sans-serif;
   --monospace: "Inconsolata", monospace;
+
+  /* shadows */
+
+  --shadow: rgba(var(--primaryColorRgb), 0.16) 0px 1px 4px;
 }
