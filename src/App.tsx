@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { size } from "./styles/breakpoints";
+
 import { backend } from "./declarations/backend";
-import { Principal } from "@dfinity/principal";
+import type { Principal } from "@dfinity/principal";
 
 // auth
 import { useAuth } from "./context/Auth";
@@ -12,7 +12,7 @@ import useUsers from "./hooks/useUsers";
 
 // components
 import { Nav } from "./components/layout/_index";
-import Loading from "./components/ui/Loading";
+import { Map } from "./panels/_index";
 
 interface ICRC1Account {
   owner: Principal;
@@ -32,13 +32,12 @@ interface User {
   id: string;
 }
 
-const IS_LOCAL_NETWORK = process.env.DFX_NETWORK == "local";
+const IS_LOCAL_NETWORK = process.env.DFX_NETWORK === "local";
 
 function App() {
   const { userPrincipal } = useAuth();
   const { users, refreshUsers } = useUsers();
   const [balance, setBalance] = useState<string>("");
-  const [balanceLoading, setBalanceLoading] = useState<boolean>(false);
   const userId = userPrincipal && userPrincipal.toString();
 
   const userExists = async (): Promise<boolean> => {
@@ -71,12 +70,10 @@ function App() {
   };
 
   const refreshBalance = async (): Promise<void> => {
-    setBalanceLoading(true);
     const account: ICRC1Account = { owner: userPrincipal, subaccount: [] };
     const balance = await backend.icrc1_balance_of(account);
     setBalance((Number(balance) / 10 ** 8).toFixed(2));
     console.log("balance refreshed");
-    setBalanceLoading(false);
   };
 
   const registerNewUser = async () => {
@@ -114,34 +111,13 @@ function App() {
   }, [userPrincipal]);
 
   return (
-    <div>
-      <Nav setBalance={setBalance} />
+    <AppStyled>
+      <Nav balance={balance} setBalance={setBalance} />
 
       <Main>
-        <div>
-          <h3 className="sectionTitle">
-            token{" "}
-            <a
-              href="https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.ic0.app/?id=6jhti-pyaaa-aaaag-abnwa-cai"
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              interface
-            </a>
-          </h3>
-          <Token>
-            <div className="balance">
-              balance: <span>{balance ? balance : "..."}</span>
-            </div>
+        <Map />
 
-            {balanceLoading && (
-              <div className="balance">
-                <Loading />
-              </div>
-            )}
-          </Token>
-        </div>
-
+        {/* users */}
         <div>
           <h3 className="sectionTitle">registered users</h3>
           {users.length > 0 ? (
@@ -164,18 +140,20 @@ function App() {
           )}
         </div>
       </Main>
-    </div>
+    </AppStyled>
   );
 }
+
+const AppStyled = styled.div`
+  padding: 0 1rem;
+  margin-bottom: 4rem;
+`;
 
 const Main = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-
-  max-width: ${size.tablet}px;
   margin: 0 auto;
-  padding: 2rem;
 `;
 
 const Token = styled.div`

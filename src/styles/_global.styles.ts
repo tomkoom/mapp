@@ -63,7 +63,7 @@ const GlobalStyles = createGlobalStyle`
   }
 
   html {
-    font-size: 20px; /* root font size */
+    font-size: 16px; /* root font size */
   }
 
   body {

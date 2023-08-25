@@ -46,14 +46,13 @@
   --fsText: 0.9rem;
   --fs7: 0.8rem;
 
-  /* font-weight */
-
-  --fwSemiBold: 600;
+  --fwBlack: 900;
+  --fwBold: 700;
   --fwMedium: 500;
   --fwRegular: 400;
 
   /* font-family */
 
-  --fontFamily: "Inconsolata", monospace;
+  --fontFamily: "Inter", sans-serif;
   --monospace: "Inconsolata", monospace;
 }
