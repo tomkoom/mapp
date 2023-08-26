@@ -3,7 +3,6 @@ import {
   $query,
   $update,
   Opt,
-  Record,
   Vec,
   Principal,
   Tuple,
@@ -22,12 +21,11 @@ import {
   ICRC1Value,
 } from "azle/canisters/icrc";
 
-type User = Record<{
-  id: string;
-}>;
+import type { User, ProposalId, Proposal, ProposalPayload } from "./types";
 
-// map
+// maps
 const users = new StableBTreeMap<Principal, User>(0, 100, 1_000);
+const proposals = new StableBTreeMap<ProposalId, Proposal>(1, 100, 2_000);
 
 $query;
 export function getUserById(id: Principal): Opt<User> {
@@ -36,7 +34,6 @@ export function getUserById(id: Principal): Opt<User> {
 
 $query;
 export function userExists(id: Principal): boolean {
-  console.log(id.toString());
   return users.containsKey(id);
 }
 
@@ -91,4 +88,30 @@ export async function icrc1_balance_of(account: ICRC1Account): Promise<nat> {
     Ok: (ok) => ok,
     Err: (err) => ic.trap(err),
   });
+}
+
+// proposals
+
+$update;
+export function addProposal(payload: ProposalPayload): Opt<Proposal> {
+  const id = proposals.len();
+
+  const proposal = {
+    id: id,
+    timestamp: ic.time(),
+    votes_yes: { amount_e8s: 0n },
+    votes_no: { amount_e8s: 0n },
+    voters: [],
+    proposer: ic.caller(),
+    state: { Open: null },
+    payload: payload,
+  };
+
+  console.log(proposal);
+  return proposals.insert(id, proposal);
+}
+
+$query;
+export function getProposals(): Vec<Proposal> {
+  return proposals.values();
 }

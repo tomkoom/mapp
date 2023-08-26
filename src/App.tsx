@@ -1,18 +1,26 @@
-import { useEffect, useState } from "react";
-import styled from "styled-components";
-
+import { useEffect } from "react";
 import { backend } from "./declarations/backend";
 import type { Principal } from "@dfinity/principal";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  createRoutesFromElements,
+  Route,
+} from "react-router-dom";
 
 // auth
 import { useAuth } from "./context/Auth";
 
-// hooks
-import useUsers from "./hooks/useUsers";
+// shared
+import { refreshUsers, refreshProposals } from "./shared/shared";
 
 // components
-import { Nav } from "./components/layout/_index";
-import { Map } from "./panels/_index";
+import { RootLayout } from "./components/layout/_index";
+import { Map, Proposals, Users } from "./pages/_index";
+
+// state
+import { useAppDispatch } from "./hooks/useRedux";
+import { setUserBalance } from "./state/user";
 
 interface ICRC1Account {
   owner: Principal;
@@ -28,21 +36,34 @@ interface ICRC1TransferArgs {
   amount: bigint;
 }
 
-interface User {
-  id: string;
-}
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/" element={<RootLayout />}>
+      <Route
+        path="*"
+        element={
+          <p style={{ textAlign: "center" }}>Requested page doesn't exist</p>
+        }
+      />
+      <Route index element={<Map />} />
+      <Route path="proposals" element={<Proposals />} />
+      <Route path="users" element={<Users />} />
+    </Route>,
+  ),
+);
 
 const IS_LOCAL_NETWORK = process.env.DFX_NETWORK === "local";
 
 function App() {
+  const dispatch = useAppDispatch();
   const { userPrincipal } = useAuth();
-  const { users, refreshUsers } = useUsers();
-  const [balance, setBalance] = useState<string>("");
-  const [mapIsLoaded, setMapIsLoaded] = useState<boolean>(false);
-  const [selected, setSelected] = useState<google.maps.LatLngLiteral | null>(
-    null,
-  );
-  const userId = userPrincipal && userPrincipal.toString();
+
+  useEffect(() => {
+    if (backend) {
+      refreshUsers();
+      refreshProposals();
+    }
+  }, [backend]);
 
   const userExists = async (): Promise<boolean> => {
     const exists = await backend.userExists(userPrincipal);
@@ -75,9 +96,12 @@ function App() {
 
   const refreshBalance = async (): Promise<void> => {
     const account: ICRC1Account = { owner: userPrincipal, subaccount: [] };
-    const balance = await backend.icrc1_balance_of(account);
-    setBalance((Number(balance) / 10 ** 8).toFixed(2));
-    console.log("balance refreshed");
+    await backend.icrc1_balance_of(account).then((res) => {
+      if (res) {
+        dispatch(setUserBalance((Number(res) / 10 ** 8).toFixed(2)));
+        console.log("balance refreshed");
+      }
+    });
   };
 
   const registerNewUser = async () => {
@@ -106,7 +130,7 @@ function App() {
       // local
       if (IS_LOCAL_NETWORK) {
         const timeoutId = setTimeout(
-          async () => setBalance("1000.00"),
+          async () => dispatch(setUserBalance("1000.00")),
           4 * 1000,
         );
         return () => clearTimeout(timeoutId);
@@ -114,55 +138,7 @@ function App() {
     }
   }, [userPrincipal]);
 
-  return (
-    <AppStyled>
-      <Nav
-        balance={balance}
-        setBalance={setBalance}
-        setSelected={setSelected}
-        mapIsLoaded={mapIsLoaded}
-      />
-
-      <Main>
-        <Map selected={selected} setMapIsLoaded={setMapIsLoaded} />
-
-        {/* users */}
-        {/* <div>
-          <h3 className="sectionTitle">registered users</h3>
-          {users.length > 0 ? (
-            <ul>
-              {users.map((user) => (
-                <li
-                  style={
-                    userId === user.id
-                      ? { backgroundColor: "var(--underlay1)" }
-                      : null
-                  }
-                  key={user.id}
-                >
-                  {user.id}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            "..."
-          )}
-        </div> */}
-      </Main>
-    </AppStyled>
-  );
+  return <RouterProvider router={router} />;
 }
-
-const AppStyled = styled.div`
-  /* padding: 0 1rem; */
-  /* margin-bottom: 4rem; */
-`;
-
-const Main = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin: 0 auto;
-`;
 
 export default App;

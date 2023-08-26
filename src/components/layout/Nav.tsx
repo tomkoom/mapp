@@ -1,48 +1,69 @@
-import { FC, Dispatch, SetStateAction, useState } from "react";
+import { FC } from "react";
 import styled from "styled-components";
+import { backend } from "../../declarations/backend";
 
 // utils
 import { formatId } from "../../utils/formatId";
 
-// components
-import { Btn } from "../ui/_index";
-import { AutocompleteInput } from "../../panels/map/_index";
-
 // auth
 import { useAuth } from "../../context/Auth";
 
-interface NavProps {
-  balance: string;
-  setBalance: Dispatch<SetStateAction<string>>;
-  setSelected: Dispatch<SetStateAction<google.maps.LatLngLiteral | null>>;
-  mapIsLoaded: boolean;
-}
+// shared
+import { signOut } from "../../shared/shared";
 
-const Nav: FC<NavProps> = ({
-  balance,
-  setBalance,
-  setSelected,
-  mapIsLoaded,
-}): JSX.Element => {
-  const { isAuthenticated, identity, login, logout } = useAuth();
+// components
+import { Btn } from "../ui/_index";
 
-  const id = identity && identity.getPrincipal().toString();
+// router
+import { Link } from "react-router-dom";
 
-  const signOut = async () => {
-    setBalance("");
-    await logout();
+// state
+import { useAppSelector } from "../../hooks/useRedux";
+import { selectUserBalance } from "../../state/user";
+
+const Nav: FC = (): JSX.Element => {
+  const { isAuthenticated, userPrincipal, login, logout } = useAuth();
+  const balance = useAppSelector(selectUserBalance);
+  const userId = userPrincipal && userPrincipal.toString();
+
+  const addProposal = async (): Promise<void> => {
+    if (!userPrincipal.isAnonymous()) {
+      await backend
+        .addProposal({
+          position: { lat: 0, lng: 0 },
+          description: "123",
+        })
+        .then((res) => console.log(res));
+    }
+    console.log("anonymous users can't submit proposals");
+  };
+
+  const getProposals = async (): Promise<void> => {
+    const res = await backend.getProposals().then((res) => console.log(res));
   };
 
   return (
     <NavStyled>
       <div id="title">
-        <h1>mapp</h1>
-        <span>- collaboratively curated map</span>
+        <Logo to="/">
+          <h1>mapp</h1>
+        </Logo>
+        {/* <span>- collaboratively curated map</span> */}
       </div>
 
-      {mapIsLoaded && <AutocompleteInput setSelected={setSelected} />}
-
       <NavItems>
+        <Link to="/">Map</Link>
+        <Link to="/proposals">Proposals</Link>
+        <Link to="/users">Users</Link>
+
+        <a
+          href="https://tomkoom.notion.site/about-mapp-21fa0313cea846df9f1fcea76be4b28b?pvs=25"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          About
+        </a>
+
         <a
           href="https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.ic0.app/?id=6jhti-pyaaa-aaaag-abnwa-cai"
           target="_blank"
@@ -55,14 +76,22 @@ const Nav: FC<NavProps> = ({
           Balance: <span>{balance ? balance : "..."}</span>
         </div>
 
-        {isAuthenticated ? (
-          <LoggedIn>
-            <span>{formatId(id)}</span>
-            <Btn $btntype="secondary" text="Logout" onClick={signOut} />
-          </LoggedIn>
-        ) : (
-          <Btn $btntype="secondary" text="Login" onClick={login} />
-        )}
+        <Btns>
+          <Btn $btntype="primary" text="add point" onClick={addProposal} />
+          <Btn $btntype="primary" text="get" onClick={getProposals} />
+          {isAuthenticated ? (
+            <LoggedIn>
+              <span>{formatId(userId)}</span>
+              <Btn
+                $btntype="secondary"
+                text="Logout"
+                onClick={() => signOut(logout)}
+              />
+            </LoggedIn>
+          ) : (
+            <Btn $btntype="secondary" text="Login" onClick={login} />
+          )}
+        </Btns>
       </NavItems>
     </NavStyled>
   );
@@ -84,15 +113,19 @@ const NavStyled = styled.div`
     margin-right: 0.5rem;
     gap: 0.125rem;
 
-    > h1 {
-      font-size: var(--fs5);
-      font-weight: var(--fwBlack);
-      padding-bottom: 0.2rem;
-    }
-
     > span {
       margin-left: 0.25rem;
     }
+  }
+`;
+
+const Logo = styled(Link)`
+  text-decoration: none;
+
+  > h1 {
+    font-size: var(--fs5);
+    font-weight: var(--fwBlack);
+    padding-bottom: 0.2rem;
   }
 `;
 
@@ -107,6 +140,13 @@ const NavItems = styled.div`
     font-size: var(--fsText);
     white-space: nowrap;
   }
+`;
+
+const Btns = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
 `;
 
 const LoggedIn = styled.div`

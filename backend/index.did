@@ -24,6 +24,29 @@ type ICRC1Value = variant {
   Text : text;
 };
 type ManualReply = variant { Ok : nat; Err : ICRC1TransferError };
+type Proposal = record {
+  id : nat;
+  votes_no : Tokens;
+  voters : vec principal;
+  state : ProposalState;
+  timestamp : nat64;
+  proposer : principal;
+  votes_yes : Tokens;
+  payload : ProposalPayload;
+};
+type ProposalPayload = record {
+  description : text;
+  position : _InlineProposalPayloadPosition;
+};
+type ProposalState = variant {
+  Failed : text;
+  Open;
+  Executing;
+  Rejected;
+  Succeeded;
+  Accepted;
+};
+type Tokens = record { amount_e8s : nat };
 type User = record { id : text };
 type _InlineICRC1TransferErrorBadBurn = record { min_burn_amount : nat };
 type _InlineICRC1TransferErrorBadFee = record { expected_fee : nat };
@@ -34,8 +57,11 @@ type _InlineICRC1TransferErrorGenericError = record {
   error_code : nat;
 };
 type _InlineICRC1TransferErrorInsufficientFunds = record { balance : nat };
+type _InlineProposalPayloadPosition = record { lat : float32; lng : float32 };
 service : () -> {
+  addProposal : (ProposalPayload) -> (opt Proposal);
   addUser : (principal) -> (opt User);
+  getProposals : () -> (vec Proposal) query;
   getUserById : (principal) -> (opt User) query;
   getUsers : () -> (vec User) query;
   icrc1_balance_of : (ICRC1Account) -> (nat) query;

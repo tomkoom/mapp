@@ -1,4 +1,4 @@
-import React, { Dispatch, FC, SetStateAction } from "react";
+import { FC } from "react";
 import styled from "styled-components";
 import usePlacesAutocomplete, {
   getGeocode,
@@ -6,15 +6,22 @@ import usePlacesAutocomplete, {
 } from "use-places-autocomplete";
 
 // components
-import { Btn } from "../../components/ui/_index";
+import { Btn } from "./_index";
+
+// state
+import { useAppDispatch } from "../../hooks/useRedux";
+import { setMapPosition } from "../../state/map";
 
 interface AutocompleteInputProps {
-  setSelected: Dispatch<SetStateAction<google.maps.LatLngLiteral>>;
+  mapIsLoaded: boolean;
 }
 
 const AutocompleteInput: FC<AutocompleteInputProps> = ({
-  setSelected,
+  mapIsLoaded,
 }): JSX.Element => {
+  if (!mapIsLoaded) return null;
+  const dispatch = useAppDispatch();
+
   const {
     ready,
     value,
@@ -30,7 +37,7 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
     // get lat, lng
     const results = await getGeocode({ address });
     const { lat, lng } = getLatLng(results[0]);
-    setSelected({ lat, lng });
+    dispatch(setMapPosition({ lat, lng }));
   };
 
   return (
@@ -92,6 +99,7 @@ const Options = styled.ul`
   font-size: var(--fsText);
   line-height: 110%;
   box-shadow: var(--shadow);
+  z-index: 1;
 
   > li {
     display: flex;

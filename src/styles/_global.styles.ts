@@ -25,7 +25,7 @@ const GlobalStyles = createGlobalStyle`
   h4,
   h5,
   h6 {
-    font-weight: var(--fwSemiBold);
+    font-weight: var(--fwBold);
     line-height: 100%;
   }
 
