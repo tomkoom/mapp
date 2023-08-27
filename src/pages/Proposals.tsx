@@ -42,7 +42,7 @@ const Proposals: FC = (): JSX.Element => {
   const formatDate = (ts: number) => {
     const date = new Date(ts / 1000_000);
     const formatted =
-      date.getHours() +
+      date.getHours().toString().padStart(2, "0") +
       ":" +
       date.getMinutes().toString().padStart(2, "0") +
       ", " +
@@ -60,10 +60,6 @@ const Proposals: FC = (): JSX.Element => {
       >
         proposals
       </h2>
-      <p>
-        for the testing purposes 2000 tokens are enough to accept or decline
-        proposal
-      </p>
       {proposals.length > 0 ? (
         <List>
           {[...proposals].reverse().map((proposal: any) => (
@@ -74,31 +70,40 @@ const Proposals: FC = (): JSX.Element => {
                 state {Object.keys(proposal.state)[0]}
               </span>
               <span>
-                created at
+                created at:
                 <br />
                 {formatDate(proposal.timestamp)}
               </span>
               <span>
-                proposer
+                proposer:
                 <br />
                 {proposal.proposer}
               </span>
-              <span>votes accept: {proposal.votes_yes_e8s}</span>
-              <span>votes reject: {proposal.votes_no_e8s}</span>
+              <span>
+                votes accept: {(proposal.votes_yes_e8s / 10 ** 8).toFixed(2)}
+                <br />
+                votes reject: {(proposal.votes_no_e8s / 10 ** 8).toFixed(2)}
+              </span>
+
+              <span>
+                description:
+                <br />
+                {proposal.payload.description}
+              </span>
+              <span>
+                lat: {proposal.payload.position.lat}
+                <br />
+                lng: {proposal.payload.position.lng}
+              </span>
 
               {isAuthenticated && (
-                <span>
+                <span id="btns">
                   <Btn
                     $btntype="primary"
                     text="Accept"
                     onClick={() => vote(proposal.id, "yes")}
                     disabled={voteLoading}
                   />
-                </span>
-              )}
-
-              {isAuthenticated && (
-                <span>
                   <Btn
                     $btntype="primary"
                     text="Reject"
@@ -126,12 +131,20 @@ const List = styled.ul`
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
     margin-bottom: 0.5rem;
     padding: 1rem;
     background-color: var(--underlay1);
 
     > span {
       flex: 1;
+    }
+
+    > span#btns {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
   }
 `;

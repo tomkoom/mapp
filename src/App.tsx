@@ -44,7 +44,7 @@ const router = createBrowserRouter(
           <p style={{ textAlign: "center" }}>Requested page doesn't exist</p>
         }
       />
-      <Route index element={<Map />} />
+      <Route index element={<Map width="100%" height="calc(100vh - 4rem)" />} />
       <Route path="proposals" element={<Proposals />} />
       <Route path="users" element={<Users />} />
     </Route>,

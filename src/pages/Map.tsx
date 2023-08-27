@@ -13,7 +13,12 @@ import { selectMapPosition, setMapIsLoaded } from "../state/map";
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const libs: Libraries = ["places"];
 
-const Map: FC = (): JSX.Element => {
+interface MapProps {
+  width: string;
+  height: string;
+}
+
+const Map: FC<MapProps> = ({ width, height }): JSX.Element => {
   const dispatch = useAppDispatch();
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: API_KEY,
@@ -30,15 +35,19 @@ const Map: FC = (): JSX.Element => {
     return <div>Loading...</div>;
   }
 
-  return <GMap />;
+  return (
+    <div>
+      <GMap width={width} height={height} />
+    </div>
+  );
 };
 
-const GMap: FC = (): JSX.Element => {
+const GMap: FC<MapProps> = ({ width, height }): JSX.Element => {
   const position = useAppSelector(selectMapPosition);
 
   const containerStyle = {
-    width: "100%",
-    height: "calc(100vh - 4rem) ",
+    width,
+    height,
   };
 
   const center: google.maps.LatLngLiteral = {

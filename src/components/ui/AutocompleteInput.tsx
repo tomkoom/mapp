@@ -5,9 +5,6 @@ import usePlacesAutocomplete, {
   getLatLng,
 } from "use-places-autocomplete";
 
-// components
-import { Btn } from "./_index";
-
 // state
 import { useAppDispatch } from "../../hooks/useRedux";
 import { setMapPosition } from "../../state/map";
@@ -19,7 +16,7 @@ interface AutocompleteInputProps {
 const AutocompleteInput: FC<AutocompleteInputProps> = ({
   mapIsLoaded,
 }): JSX.Element => {
-  if (!mapIsLoaded) return null;
+  if (!mapIsLoaded) return <p>map is not loaded</p>;
   const dispatch = useAppDispatch();
 
   const {
@@ -49,11 +46,6 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           disabled={!ready}
-        />
-        <Btn
-          $btntype="primary"
-          text="add to map"
-          onClick={() => console.log("add")}
         />
       </Input>
 

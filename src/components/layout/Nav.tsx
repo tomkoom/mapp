@@ -15,25 +15,40 @@ import { signOut } from "../../shared/shared";
 
 // components
 import { Btn } from "../ui/_index";
+import { AddPointModal } from "../../modals/_index";
 
 // router
 import { NavLink } from "react-router-dom";
 
 // state
-import { useAppSelector } from "../../hooks/useRedux";
+import { useAppSelector, useAppDispatch } from "../../hooks/useRedux";
 import { selectUserBalance } from "../../state/user";
+import {
+  selectAddPointModalIsOpen,
+  setAddPointModalIsOpen,
+} from "../../state/modals/addPointModal";
 
 const Nav: FC = (): JSX.Element => {
+  const dispatch = useAppDispatch();
   const { isAuthenticated, userPrincipal, login, logout, actor } = useAuth();
   const { refreshProposals } = useBackend();
   const balance = useAppSelector(selectUserBalance);
   const userId = userPrincipal && userPrincipal.toString();
+  const isOpen = useAppSelector(selectAddPointModalIsOpen);
   const about =
     "https://tomkoom.notion.site/about-mapp-21fa0313cea846df9f1fcea76be4b28b?pvs=25";
   const tokenInterface =
     "https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.ic0.app/?id=6jhti-pyaaa-aaaag-abnwa-cai";
   const active = {
     color: "var(--primaryColor)",
+  };
+
+  const openModal = () => {
+    dispatch(setAddPointModalIsOpen(true));
+  };
+
+  const closeModal = () => {
+    dispatch(setAddPointModalIsOpen(false));
   };
 
   const addProposal = async (): Promise<void> => {
@@ -52,6 +67,9 @@ const Nav: FC = (): JSX.Element => {
 
   return (
     <NavStyled>
+      {/* modal */}
+      <AddPointModal isOpen={isOpen} onClose={closeModal} />
+
       <div id="title">
         <Logo to="/">
           <h1>mapp</h1>
@@ -91,7 +109,7 @@ const Nav: FC = (): JSX.Element => {
 
         <Btns>
           {isAuthenticated && (
-            <Btn $btntype="primary" text="Add Point" onClick={addProposal} />
+            <Btn $btntype="primary" text="Add Point" onClick={openModal} />
           )}
 
           {isAuthenticated ? (

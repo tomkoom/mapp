@@ -6,8 +6,20 @@ import proposals from "./proposals";
 import user from "./user";
 import users from "./users";
 
+// modals
+import addPointModal from "./modals/addPointModal";
+
 const store = configureStore({
-  reducer: { template, map, proposals, user, users },
+  reducer: {
+    template,
+    map,
+    proposals,
+    user,
+    users,
+    
+    // modals
+    addPointModal,
+  },
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
