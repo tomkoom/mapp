@@ -2,8 +2,10 @@ import { useContext, createContext, useState, useEffect } from "react";
 import { AuthClient } from "@dfinity/auth-client";
 import { Actor, HttpAgent, Identity, Agent } from "@dfinity/agent";
 import type { Principal } from "@dfinity/principal";
-import { idlFactory } from "../declarations/backend";
 import { _SERVICE } from "../declarations/backend/backend.did";
+
+// use backend actor
+import { createActor, canisterId } from "../declarations/backend";
 
 export const AuthContext = createContext(null);
 export const useAuth = () => {
@@ -14,6 +16,10 @@ export const useAuth = () => {
 // .env variables change after deploy
 const IS_LOCAL_NETWORK = process.env.DFX_NETWORK === "local";
 const HOST = IS_LOCAL_NETWORK ? `http://localhost:3000/` : "https://icp0.io/";
+const LOCAL_II = process.env.CANISTER_ID_INTERNET_IDENTITY;
+const IDENTITY_PROVIDER = IS_LOCAL_NETWORK
+  ? `http://127.0.0.1:4943/?canisterId=${LOCAL_II}`
+  : "https://identity.ic0.app/";
 
 export const AuthProvider = ({ children }) => {
   const [authClient, setAuthClient] = useState<AuthClient | null>(null);
@@ -47,9 +53,8 @@ export const AuthProvider = ({ children }) => {
       host: HOST,
       identity,
     });
-    actor = Actor.createActor(idlFactory, {
+    actor = createActor(canisterId, {
       agent,
-      canisterId: process.env.CANISTER_ID_BACKEND,
     });
 
     setAuthClient(authClient);
@@ -62,9 +67,15 @@ export const AuthProvider = ({ children }) => {
 
   const login = async () => {
     if (isAuthenticated) throw new Error("already logged in");
+    console.log(IS_LOCAL_NETWORK);
+    console.log(LOCAL_II);
+    console.log(IDENTITY_PROVIDER);
+
     await authClient.login({
+      identityProvider: IDENTITY_PROVIDER,
+      // maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000),
       onSuccess: async () => {
-        reset();
+        await reset();
       },
     });
   };
@@ -72,6 +83,8 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     if (!isAuthenticated) throw new Error("not logged in");
     await authClient.logout();
+
+    await reset();
     return reset();
   };
 

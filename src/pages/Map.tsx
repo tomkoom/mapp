@@ -38,7 +38,7 @@ const GMap: FC = (): JSX.Element => {
 
   const containerStyle = {
     width: "100%",
-    height: "calc(100vh - 3rem) ",
+    height: "calc(100vh - 4rem) ",
   };
 
   const center: google.maps.LatLngLiteral = {

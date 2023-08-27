@@ -91,11 +91,13 @@ export async function icrc1_balance_of(account: ICRC1Account): Promise<nat> {
 }
 
 // proposals
-
 $update;
 export function addProposal(payload: ProposalPayload): Opt<Proposal> {
-  const id = proposals.len();
+  if (ic.id().isAnonymous()) {
+    return Opt.None;
+  }
 
+  const id = proposals.len();
   const proposal = {
     id: id,
     timestamp: ic.time(),
@@ -114,4 +116,36 @@ export function addProposal(payload: ProposalPayload): Opt<Proposal> {
 $query;
 export function getProposals(): Vec<Proposal> {
   return proposals.values();
+}
+
+$update;
+export function vote(id: nat, amount: nat, value: string): Opt<Proposal> {
+  return match(proposals.get(id), {
+    Some: (proposal) => {
+      switch (value) {
+        case "yes":
+          const yesVotesAmount = proposal.votes_yes.amount_e8s;
+          proposals.insert(id, {
+            ...proposal,
+            votes_yes: {
+              amount_e8s: yesVotesAmount + amount,
+            },
+          });
+
+          break;
+        case "no":
+          const noVotesAmount = proposal.votes_no.amount_e8s;
+          proposals.insert(id, {
+            ...proposal,
+            votes_no: {
+              amount_e8s: noVotesAmount + amount,
+            },
+          });
+
+          break;
+      }
+      return Opt.Some(proposal);
+    },
+    None: () => Opt.None,
+  });
 }

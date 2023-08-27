@@ -40,7 +40,7 @@ const BtnStyled = styled.button<{ $btntype: "primary" | "secondary" }>`
   height: 2.25rem;
   padding: 0 0.75rem;
   font-size: var(--fsText);
-  font-weight: var(--fwBold);
+  font-weight: var(--fwMedium);
   white-space: nowrap;
   border-radius: 1.125rem;
   transition: all 0.25s, opacity 1s;
@@ -51,6 +51,10 @@ const BtnStyled = styled.button<{ $btntype: "primary" | "secondary" }>`
 
   &:hover {
     background-color: ${(p) => hoverBgColors[p.$btntype]};
+  }
+
+  &:disabled {
+    opacity: 50%;
   }
 `;
 

@@ -20,7 +20,7 @@ import { Map, Proposals, Users } from "./pages/_index";
 
 // state
 import { useAppDispatch } from "./hooks/useRedux";
-import { setUserBalance } from "./state/user";
+import { setUserBalance, setUserBalanceE8S } from "./state/user";
 
 interface ICRC1Account {
   owner: Principal;
@@ -99,6 +99,7 @@ function App() {
     await backend.icrc1_balance_of(account).then((res) => {
       if (res) {
         dispatch(setUserBalance((Number(res) / 10 ** 8).toFixed(2)));
+        dispatch(setUserBalanceE8S(Number(res)));
         console.log("balance refreshed");
       }
     });

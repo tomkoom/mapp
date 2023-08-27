@@ -68,4 +68,5 @@ service : () -> {
   icrc1_metadata : () -> (vec record { text; ICRC1Value }) query;
   icrc1_transfer : (ICRC1TransferArgs) -> (ManualReply);
   userExists : (principal) -> (bool) query;
+  vote : (nat, nat, text) -> (opt Proposal);
 }

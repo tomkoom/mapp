@@ -3,10 +3,12 @@ import type { RootState } from "./_store";
 
 interface UserState {
   balance: string;
+  balance_e8s: number;
 }
 
 const initialState: UserState = {
   balance: "",
+  balance_e8s: 0,
 };
 
 const user = createSlice({
@@ -16,11 +18,15 @@ const user = createSlice({
     setUserBalance(state, { payload }: PayloadAction<string>) {
       state.balance = payload;
     },
+    setUserBalanceE8S(state, { payload }: PayloadAction<number>) {
+      state.balance_e8s = payload;
+    },
   },
 });
 
 const selectUserBalance = (state: RootState) => state.user.balance;
-export { selectUserBalance };
+const selectUserBalanceE8S = (state: RootState) => state.user.balance_e8s;
+export { selectUserBalance, selectUserBalanceE8S };
 
-export const { setUserBalance } = user.actions;
+export const { setUserBalance, setUserBalanceE8S } = user.actions;
 export default user.reducer;

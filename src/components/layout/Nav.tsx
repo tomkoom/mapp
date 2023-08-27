@@ -15,31 +15,35 @@ import { signOut } from "../../shared/shared";
 import { Btn } from "../ui/_index";
 
 // router
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 // state
 import { useAppSelector } from "../../hooks/useRedux";
 import { selectUserBalance } from "../../state/user";
 
 const Nav: FC = (): JSX.Element => {
-  const { isAuthenticated, userPrincipal, login, logout } = useAuth();
+  const { isAuthenticated, userPrincipal, login, logout, actor } = useAuth();
   const balance = useAppSelector(selectUserBalance);
   const userId = userPrincipal && userPrincipal.toString();
+  const about =
+    "https://tomkoom.notion.site/about-mapp-21fa0313cea846df9f1fcea76be4b28b?pvs=25";
+  const tokenInterface =
+    "https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.ic0.app/?id=6jhti-pyaaa-aaaag-abnwa-cai";
+  const active = {
+    color: "var(--primaryColor)",
+  };
 
   const addProposal = async (): Promise<void> => {
-    if (!userPrincipal.isAnonymous()) {
-      await backend
+    if (isAuthenticated) {
+      await actor
         .addProposal({
           position: { lat: 0, lng: 0 },
           description: "123",
         })
         .then((res) => console.log(res));
+    } else {
+      console.log("user is not auth");
     }
-    console.log("anonymous users can't submit proposals");
-  };
-
-  const getProposals = async (): Promise<void> => {
-    const res = await backend.getProposals().then((res) => console.log(res));
   };
 
   return (
@@ -48,28 +52,33 @@ const Nav: FC = (): JSX.Element => {
         <Logo to="/">
           <h1>mapp</h1>
         </Logo>
-        {/* <span>- collaboratively curated map</span> */}
+        {/* <span>- collaborative map</span> */}
+
+        <Routes>
+          <NavLink to="/" style={({ isActive }) => (isActive ? active : null)}>
+            MAP
+          </NavLink>
+          <NavLink
+            to="/proposals"
+            style={({ isActive }) => (isActive ? active : null)}
+          >
+            PROPOSALS
+          </NavLink>
+          <NavLink
+            to="/users"
+            style={({ isActive }) => (isActive ? active : null)}
+          >
+            USERS
+          </NavLink>
+          <a href={about} target="_blank" rel="noreferrer noopener">
+            ABOUT
+          </a>
+        </Routes>
       </div>
 
       <NavItems>
-        <Link to="/">Map</Link>
-        <Link to="/proposals">Proposals</Link>
-        <Link to="/users">Users</Link>
-
-        <a
-          href="https://tomkoom.notion.site/about-mapp-21fa0313cea846df9f1fcea76be4b28b?pvs=25"
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          About
-        </a>
-
-        <a
-          href="https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.ic0.app/?id=6jhti-pyaaa-aaaag-abnwa-cai"
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          Token interface
+        <a href={tokenInterface} target="_blank" rel="noreferrer noopener">
+          Token
         </a>
 
         <div id="balance">
@@ -77,8 +86,10 @@ const Nav: FC = (): JSX.Element => {
         </div>
 
         <Btns>
-          <Btn $btntype="primary" text="add point" onClick={addProposal} />
-          <Btn $btntype="primary" text="get" onClick={getProposals} />
+          {isAuthenticated && (
+            <Btn $btntype="primary" text="Add Point" onClick={addProposal} />
+          )}
+
           {isAuthenticated ? (
             <LoggedIn>
               <span>{formatId(userId)}</span>
@@ -89,7 +100,7 @@ const Nav: FC = (): JSX.Element => {
               />
             </LoggedIn>
           ) : (
-            <Btn $btntype="secondary" text="Login" onClick={login} />
+            <Btn $btntype="primary" text="Login" onClick={login} />
           )}
         </Btns>
       </NavItems>
@@ -99,7 +110,7 @@ const Nav: FC = (): JSX.Element => {
 
 const NavStyled = styled.div`
   width: 100%;
-  height: 3rem;
+  height: 4rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -119,13 +130,27 @@ const NavStyled = styled.div`
   }
 `;
 
-const Logo = styled(Link)`
+const Logo = styled(NavLink)`
   text-decoration: none;
 
   > h1 {
     font-size: var(--fs5);
     font-weight: var(--fwBlack);
     padding-bottom: 0.2rem;
+    margin-right: 1rem;
+  }
+`;
+
+const Routes = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  > a {
+    color: var(--tertiaryColor);
+    font-weight: var(--fwMedium);
+    font-size: var(--fs5);
+    text-decoration: none;
   }
 `;
 

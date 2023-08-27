@@ -27,7 +27,7 @@ export const refreshProposals = async (): Promise<void> => {
         ...p,
         id: String(p.id),
         voters: p.voters.map((voter) => voter.toString()),
-        timestamp: String(p.timestamp),
+        timestamp: Number(p.timestamp),
         proposer: p.proposer.toString(),
         votes_yes: String(p.votes_yes.amount_e8s),
         votes_no: String(p.votes_no.amount_e8s),
