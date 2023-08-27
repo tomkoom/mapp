@@ -6,7 +6,8 @@
       "root": "src",
       "ts": "backend/index.ts",
       "candid": "backend/index.did",
-      "wasm": ".azle/backend/backend.wasm.gz"
+      "wasm": ".azle/backend/backend.wasm.gz",
+      "opt_level": "0"
     },
     "frontend": {
       "dependencies": ["backend"],

@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { backend } from "./declarations/backend";
 import type { Principal } from "@dfinity/principal";
 import {
   createBrowserRouter,
@@ -11,8 +10,8 @@ import {
 // auth
 import { useAuth } from "./context/Auth";
 
-// shared
-import { refreshUsers, refreshProposals } from "./shared/shared";
+// hooks
+import useBackend from "./hooks/useBackend";
 
 // components
 import { RootLayout } from "./components/layout/_index";
@@ -53,26 +52,28 @@ const router = createBrowserRouter(
 );
 
 const IS_LOCAL_NETWORK = process.env.DFX_NETWORK === "local";
+const NETWORK = process.env.DFX_NETWORK;
 
 function App() {
   const dispatch = useAppDispatch();
-  const { userPrincipal } = useAuth();
+  const { userPrincipal, isAuthenticated, actor } = useAuth();
+  const { refreshUsers, refreshProposals } = useBackend();
 
   useEffect(() => {
-    if (backend) {
+    if (actor) {
       refreshUsers();
       refreshProposals();
     }
-  }, [backend]);
+  }, [actor]);
 
   const userExists = async (): Promise<boolean> => {
-    const exists = await backend.userExists(userPrincipal);
+    const exists = await actor.userExists(userPrincipal);
     console.log(exists ? "user exists" : "user is new");
     return exists;
   };
 
   const addUser = async (userPrincipal: Principal): Promise<void> => {
-    await backend.addUser(userPrincipal);
+    await actor.addUser(userPrincipal);
     await refreshUsers();
     console.log(`user with id ${userPrincipal.toString()} added to db`);
   };
@@ -89,14 +90,14 @@ function App() {
       created_at_time: [],
     };
 
-    await backend
+    await actor
       .icrc1_transfer(transferArgs)
       .then(() => console.log("tokens sent"));
   };
 
   const refreshBalance = async (): Promise<void> => {
     const account: ICRC1Account = { owner: userPrincipal, subaccount: [] };
-    await backend.icrc1_balance_of(account).then((res) => {
+    await actor.icrc1_balance_of(account).then((res) => {
       if (res) {
         dispatch(setUserBalance((Number(res) / 10 ** 8).toFixed(2)));
         dispatch(setUserBalanceE8S(Number(res)));
@@ -104,6 +105,23 @@ function App() {
       }
     });
   };
+
+  const refreshBalanceLocal = () => {
+    dispatch(setUserBalance("1000.00"));
+    dispatch(setUserBalanceE8S(Number(1000 * 10 ** 8)));
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (NETWORK === "ic") {
+        refreshBalance();
+      }
+
+      if (NETWORK === "local") {
+        refreshBalanceLocal;
+      }
+    }
+  }, [isAuthenticated]);
 
   const registerNewUser = async () => {
     const exists = await userExists();
@@ -116,7 +134,7 @@ function App() {
   };
 
   useEffect(() => {
-    if (userPrincipal && !userPrincipal.isAnonymous()) {
+    if (isAuthenticated) {
       registerNewUser();
 
       // ic
@@ -130,14 +148,11 @@ function App() {
 
       // local
       if (IS_LOCAL_NETWORK) {
-        const timeoutId = setTimeout(
-          async () => dispatch(setUserBalance("1000.00")),
-          4 * 1000,
-        );
+        const timeoutId = setTimeout(refreshBalanceLocal, 4 * 1000);
         return () => clearTimeout(timeoutId);
       }
     }
-  }, [userPrincipal]);
+  }, [isAuthenticated]);
 
   return <RouterProvider router={router} />;
 }

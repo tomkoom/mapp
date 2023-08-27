@@ -11,6 +11,7 @@ import {
   StableBTreeMap,
   Variant,
   nat,
+  Record,
 } from "azle";
 
 import {
@@ -24,8 +25,8 @@ import {
 import type { User, ProposalId, Proposal, ProposalPayload } from "./types";
 
 // maps
-const users = new StableBTreeMap<Principal, User>(0, 100, 1_000);
-const proposals = new StableBTreeMap<ProposalId, Proposal>(1, 100, 2_000);
+const users = new StableBTreeMap<Principal, User>(0, 50, 500);
+const proposals = new StableBTreeMap<ProposalId, Proposal>(1, 100, 1_000);
 
 $query;
 export function getUserById(id: Principal): Opt<User> {
@@ -101,15 +102,13 @@ export function addProposal(payload: ProposalPayload): Opt<Proposal> {
   const proposal = {
     id: id,
     timestamp: ic.time(),
-    votes_yes: { amount_e8s: 0n },
-    votes_no: { amount_e8s: 0n },
+    votes_yes_e8s: 0n,
+    votes_no_e8s: 0n,
     voters: [],
     proposer: ic.caller(),
     state: { Open: null },
     payload: payload,
   };
-
-  console.log(proposal);
   return proposals.insert(id, proposal);
 }
 
@@ -118,34 +117,34 @@ export function getProposals(): Vec<Proposal> {
   return proposals.values();
 }
 
+type VoteArgs = Record<{
+  id: nat;
+  amount_e8s: nat;
+  vote: string;
+}>;
+
 $update;
-export function vote(id: nat, amount: nat, value: string): Opt<Proposal> {
-  return match(proposals.get(id), {
-    Some: (proposal) => {
-      switch (value) {
-        case "yes":
-          const yesVotesAmount = proposal.votes_yes.amount_e8s;
-          proposals.insert(id, {
-            ...proposal,
-            votes_yes: {
-              amount_e8s: yesVotesAmount + amount,
-            },
-          });
+export function vote(voteArgs: VoteArgs): Opt<Proposal> {
+  if (ic.id().isAnonymous()) return Opt.None;
 
-          break;
-        case "no":
-          const noVotesAmount = proposal.votes_no.amount_e8s;
-          proposals.insert(id, {
-            ...proposal,
-            votes_no: {
-              amount_e8s: noVotesAmount + amount,
-            },
-          });
+  const { id, amount_e8s, vote } = voteArgs;
 
-          break;
+  match(proposals.get(id), {
+    Some: (some) => {
+      if (vote === "yes") {
+        proposals.insert(id, {
+          ...some,
+          votes_yes_e8s: some.votes_yes_e8s + amount_e8s,
+        });
       }
-      return Opt.Some(proposal);
+      if (vote === "no") {
+        proposals.insert(id, {
+          ...some,
+          votes_no_e8s: some.votes_no_e8s + amount_e8s,
+        });
+      }
     },
     None: () => Opt.None,
   });
+  return Opt.None;
 }

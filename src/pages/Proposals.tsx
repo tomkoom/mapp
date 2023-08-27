@@ -1,8 +1,9 @@
 import { FC, useState } from "react";
 import { styled } from "styled-components";
+import { VoteArgs } from "../declarations/backend/backend.did";
 
-// shared
-import { refreshProposals } from "../shared/shared";
+// hooks
+import useBackend from "../hooks/useBackend";
 
 // auth
 import { useAuth } from "../context/Auth";
@@ -16,6 +17,7 @@ import { selectProposals } from "../state/proposals";
 import { selectUserBalanceE8S } from "../state/user";
 
 const Proposals: FC = (): JSX.Element => {
+  const { refreshProposals } = useBackend();
   const { actor, isAuthenticated } = useAuth();
   const [voteLoading, setVoteLoading] = useState<boolean>(false);
   const proposals = useAppSelector(selectProposals);
@@ -24,7 +26,12 @@ const Proposals: FC = (): JSX.Element => {
   const vote = async (id: number, vote: string): Promise<void> => {
     if (isAuthenticated) {
       setVoteLoading(true);
-      await actor.vote(BigInt(id), BigInt(userBalanceE8S), vote);
+      const voteArgs: VoteArgs = {
+        id: BigInt(id),
+        amount_e8s: BigInt(userBalanceE8S),
+        vote,
+      };
+      await actor.vote(voteArgs);
       await refreshProposals();
       setVoteLoading(false);
     } else {
@@ -45,7 +52,14 @@ const Proposals: FC = (): JSX.Element => {
 
   return (
     <ProposalsStyled>
-      <h2 className="sectionTitle">proposals</h2>
+      <h2
+        className="sectionTitle"
+        onClick={async () => {
+          refreshProposals();
+        }}
+      >
+        proposals
+      </h2>
       <p>
         for the testing purposes 2000 tokens are enough to accept or decline
         proposal
@@ -69,8 +83,8 @@ const Proposals: FC = (): JSX.Element => {
                 <br />
                 {proposal.proposer}
               </span>
-              <span>votes accept: {proposal.votes_yes}</span>
-              <span>votes reject: {proposal.votes_no}</span>
+              <span>votes accept: {proposal.votes_yes_e8s}</span>
+              <span>votes reject: {proposal.votes_no_e8s}</span>
 
               {isAuthenticated && (
                 <span>

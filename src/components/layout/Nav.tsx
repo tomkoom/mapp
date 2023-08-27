@@ -1,12 +1,14 @@
 import { FC } from "react";
 import styled from "styled-components";
-import { backend } from "../../declarations/backend";
 
 // utils
 import { formatId } from "../../utils/formatId";
 
 // auth
 import { useAuth } from "../../context/Auth";
+
+// hooks
+import useBackend from "../../hooks/useBackend";
 
 // shared
 import { signOut } from "../../shared/shared";
@@ -23,6 +25,7 @@ import { selectUserBalance } from "../../state/user";
 
 const Nav: FC = (): JSX.Element => {
   const { isAuthenticated, userPrincipal, login, logout, actor } = useAuth();
+  const { refreshProposals } = useBackend();
   const balance = useAppSelector(selectUserBalance);
   const userId = userPrincipal && userPrincipal.toString();
   const about =
@@ -41,6 +44,7 @@ const Nav: FC = (): JSX.Element => {
           description: "123",
         })
         .then((res) => console.log(res));
+      await refreshProposals();
     } else {
       console.log("user is not auth");
     }

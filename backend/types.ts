@@ -14,19 +14,17 @@ export type User = Record<{
 }>;
 
 export type ProposalId = nat;
-export type Tokens = Record<{ amount_e8s: nat }>;
 
 export type ProposalPayload = Record<{
   position: Record<{ lat: float32; lng: float32 }>;
   description: string;
-  // category: Variant<{}>;
 }>;
 
 export type Proposal = Record<{
   id: nat;
   timestamp: nat64;
-  votes_yes: Tokens;
-  votes_no: Tokens;
+  votes_yes_e8s: nat;
+  votes_no_e8s: nat;
 
   voters: Vec<Principal>;
   state: ProposalState;
